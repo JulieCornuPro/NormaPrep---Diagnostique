@@ -79,9 +79,11 @@ est manuelle, par l'administrateur.
 
 1. **Fiche mission** — créée par le consultant ; le diagnostic est en statut
    `brouillon`.
-2. **Profilage réglementaire** — une dizaine de questions sur l'organisation.
-   Le résultat est affiché et **modifiable** par le consultant (il peut forcer
-   ou retirer une réglementation, avec justification).
+2. **Profilage réglementaire** — treize questions sur l'organisation. Les
+   réglementations ressortent en trois niveaux (obligatoire, à vérifier,
+   recommandé). Le consultant tranche les « à vérifier », choisit les
+   objectifs recommandés et peut forcer ou retirer une réglementation, avec
+   justification.
 3. **Questionnaire** — navigation par grand thème puis par sous-thème, sur le
    modèle de l'écran d'examen du quiz. Indicateur de progression. Chaque
    réponse est enregistrée immédiatement.
@@ -95,8 +97,12 @@ est manuelle, par l'administrateur.
 
 ## 5. Profilage réglementaire
 
-Inspiré des simulateurs réglementaires du marché (ex. Holirisk). Il remplit
-deux rôles :
+Construit à partir de l'analyse du simulateur réglementaire de HoliRisk
+(11 questions, matrice de conformité à trois niveaux). On en reprend la
+**logique** (critères de déclenchement issus des textes, publics). On n'en
+reprend **aucun texte** : la page indique que sa reproduction est interdite.
+
+Le profilage remplit deux rôles :
 
 1. **déterminer la profondeur** du questionnaire par sous-thème ;
 2. **fixer la maturité cible** par sous-thème.
@@ -104,40 +110,80 @@ deux rôles :
 > Le résultat est **indicatif** et ne constitue pas un avis juridique ; le
 > rapport le mentionne.
 
-### 5.1 Questions de profilage (première liste)
+### 5.1 Questions de profilage
 
-| Code | Question | Type |
+| Code | Question | Réponses |
 |---|---|---|
-| P01 | Effectif | tranches : < 50 / 50–249 / ≥ 250 |
-| P02 | Chiffre d'affaires annuel | tranches : < 10 M€ / 10–50 M€ / > 50 M€ |
-| P03 | Secteur d'activité | liste (secteurs des annexes I et II de NIS2 + « autre ») |
-| P04 | Entité financière au sens de DORA (banque, assurance, PSP, prestataire TIC critique…) | oui / non |
-| P05 | Traite des données personnelles | oui / non |
-| P06 | Héberge des données de santé pour le compte de tiers | oui / non |
-| P07 | Met sur le marché des produits comportant des éléments numériques | oui / non |
-| P08 | Traite, stocke ou transmet des données de cartes de paiement | oui / non |
-| P09 | Désignée OIV / OSE, ou fournisseur d'un tel opérateur | oui / non |
-| P10 | Développe ou fait développer des applications | non / interne uniquement / exposées à des clients |
-| P11 | Recours significatif au cloud ou à l'infogérance | oui / non |
+| P01 | Secteur d'activité principal | Énergie, Transport, Banque / Finance, Assurance, Santé, Eau, Infrastructure numérique, Administration publique, Industrie / Fabrication, Services numériques, Conseil / IT / ESN, Éditeur de logiciels, Autre |
+| P02 | Taille | TPE (< 50 salariés, CA < 10 M€) / PME (50–249, CA < 50 M€) / ETI (250–999, CA 50–300 M€) / Grande entreprise (≥ 1 000, CA > 300 M€) |
+| P03 | Données à caractère personnel | Aucune / courantes / sensibles (santé, biométrie, judiciaire…) |
+| P04 | Données personnelles traitées pour le compte de clients (sous-traitant, art. 28 RGPD) | oui / non |
+| P05 | Données de santé hébergées ou traitées | oui / non |
+| P06 | Lien avec le secteur financier | aucun / établissement financier / prestataire IT pour la finance |
+| P07 | Organisme public ou sous tutelle | non / commune / EPCI / département ou région / autre organisme public (+ population, facultatif) |
+| P08 | Lien avec la défense ou exploitation d'un SIIV | oui / non |
+| P09 | Acceptation de paiements par carte | oui / non |
+| P10 | Fourniture de services cloud, SaaS, infogérance, MSP/MSSP | oui / non |
+| P11 | Fournisseur d'organisations soumises à NIS2 | oui / non |
+| P12 | Développe ou fait développer des applications | non / interne uniquement / exposées à des clients |
+| P13 | Produits mis sur le marché avec éléments numériques (logiciel, objet connecté) | oui / non |
 
-P10 et P11 ne déclenchent pas de réglementation : ils ajustent la **profondeur**
-(ex. P10 = « non » propose de marquer tout le thème Applicatif N/A).
+P01 à P11 reprennent le périmètre du simulateur. P12 et P13 sont propres au
+diagnostic : P12 ajuste la **profondeur** de l'axe Applicatif (P12 = « non »
+propose de le marquer N/A), P13 rend le déclenchement du CRA indépendant du
+seul secteur.
 
-### 5.2 Réglementations et référentiels couverts
+### 5.2 Trois niveaux d'assujettissement
 
-| Code | Déclenchement (simplifié, à affiner) |
-|---|---|
-| `SOCLE` | Toujours — hygiène de base (guide ANSSI) |
-| `RGPD` | P05 = oui |
-| `NIS2-EI` | Secteur annexe I ou II et (P01 ≥ 50 ou P02 ≥ 10 M€) |
-| `NIS2-EE` | Secteur annexe I et (P01 ≥ 250 ou P02 > 50 M€), ou cas désignés |
-| `DORA` | P04 = oui |
-| `HDS` | P06 = oui |
-| `CRA` | P07 = oui |
-| `PCI-DSS` | P08 = oui |
-| `LPM` | P09 = oui |
+Comme dans le simulateur, chaque réglementation ressort avec un niveau :
 
-### 5.3 Profondeur et cible
+| Niveau | Sens | Effet dans le diagnostic |
+|---|---|---|
+| **Obligatoire** | Très probablement applicable | Cible et profondeur appliquées |
+| **À vérifier** | Dépend de critères fins (taille exacte, exceptions, désignation) | Le consultant **tranche** : confirmer (devient obligatoire) ou écarter, avec justification |
+| **Recommandé** | Bonne pratique ou référentiel volontaire | Proposé comme **objectif optionnel** (ex. viser la certification ISO 27001) ; s'il est retenu, ses cibles s'appliquent |
+
+C'est là que l'outil se distingue d'un simulateur grand public : le
+consultant est l'expert qui lève les « à vérifier » pendant l'entretien.
+
+### 5.3 Réglementations et règles de déclenchement
+
+| Code | Niveau | Déclenchement (première version) |
+|---|---|---|
+| `SOCLE` | Obligatoire | Toujours : hygiène de base (guide ANSSI) |
+| `RGPD` | Obligatoire | P03 ≠ aucune ; renforcé si données sensibles (AIPD, DPO) |
+| `RGPD-ST` | Obligatoire | P04 = oui (obligations du sous-traitant) |
+| `NIS2-EE` | Obligatoire | Secteur annexe I et ETI ou grande entreprise ; administration publique |
+| `NIS2-EI` | Obligatoire | Secteur annexe II et ETI ou grande entreprise ; secteur NIS2 et PME |
+| `NIS2-VERIF` | À vérifier | Secteur NIS2 et TPE ; éditeur de logiciels hors services cloud/MSP |
+| `NIS2-CHAINE` | À vérifier | P11 = oui et non assujetti directement (exigences répercutées par contrat, art. 21.2.d) |
+| `DORA` | Obligatoire | Banque / Finance / Assurance, ou P06 = établissement ou prestataire IT |
+| `NIS2-DORA` | À vérifier | NIS2 et DORA cumulés : DORA *lex specialis* pour le risque TIC (art. 4 NIS2) |
+| `HDS` | Obligatoire si secteur Santé, sinon à vérifier | P05 = oui ou secteur Santé |
+| `RGS` | Obligatoire | P07 ≠ non |
+| `LPM` | À vérifier | P08 = oui, ou secteur Énergie / Transport / Eau / Santé / Infra numérique et ETI ou grande entreprise |
+| `PCI-DSS` | Obligatoire | P09 = oui |
+| `CRA` | Obligatoire ou à vérifier | Obligatoire si éditeur de logiciels ou P13 = oui ; à vérifier si Infra numérique, Services numériques, Industrie |
+| `RED` | À vérifier | Secteur Industrie (équipements radio connectés) |
+| `ISO27001` | Recommandé | Toujours |
+| `EBIOS-RM` | Recommandé | Au moins une obligation ou NIS2 |
+| `ISO27005` | Recommandé | Au moins deux obligations |
+
+Points relevés dans la logique du simulateur, à corriger chez nous :
+
+- un **prestataire de services managés** (ESN, MSP, MSSP) relève de
+  l'annexe I de NIS2 dès la taille moyenne ; le secteur « Conseil / IT / ESN »
+  combiné à P10 = oui doit donc déclencher NIS2, ce que le simulateur ne fait
+  pas ;
+- certaines entités (fournisseurs DNS, registres de noms de domaine,
+  prestataires de confiance qualifiés, administrations) sont visées **quelle
+  que soit leur taille** : à traiter en « à vérifier » plutôt qu'en exclusion.
+
+Chaque réglementation porte aussi, dans le référentiel : une description, le
+critère qui l'a déclenchée (« Pourquoi »), l'échéance d'application et les
+grandes actions attendues. Ces éléments alimentent le rapport.
+
+### 5.4 Profondeur et cible
 
 Chaque réglementation porte, pour chaque sous-thème concerné, un couple
 **(profondeur requise, cible)** :
@@ -147,7 +193,8 @@ Chaque réglementation porte, pour chaque sous-thème concerné, un couple
   requise pour son sous-thème.
 - **Cible** : niveau de maturité 0–5 attendu.
 
-Quand plusieurs réglementations s'appliquent, on retient pour chaque
+Quand plusieurs réglementations retenues s'appliquent (obligatoires,
+« à vérifier » confirmées, recommandées choisies), on retient pour chaque
 sous-thème **le maximum** des profondeurs et **le maximum** des cibles, et l'on
 garde la trace de la réglementation qui fixe la cible (affichée dans le
 rapport : « cible 4 — DORA »).
@@ -288,7 +335,7 @@ références normatives, une aide à l'entretien (ce qu'il faut demander à voir
    sous-thèmes, 1 par défaut).
 4. **Score global** : moyenne des trois grands thèmes non N/A (poids égaux par
    défaut, réglables).
-5. **Cible** : voir §5.3. Cible d'un thème = moyenne des cibles de ses
+5. **Cible** : voir §5.4. Cible d'un thème = moyenne des cibles de ses
    sous-thèmes non N/A ; même règle pour la cible globale.
 6. **Écart** = cible − score (positif = en dessous de la cible).
 7. Affichage arrondi à **une décimale** ; les calculs se font sans arrondi.
@@ -348,8 +395,9 @@ Le rapport présente ainsi une **feuille de route** : quick wins, puis actions
   beaucoup d'encre), avec bandeaux et accents navy/teal. *À valider.*
 - Radar produit en **SVG simple** (polygones) côté serveur. Le support SVG de
   Dompdf est limité : à valider tôt par un prototype.
-- Contenu : page de garde, synthèse dirigeant (une page), profil
-  réglementaire, résultats, détail par thème, feuille de route, annexes
+- Contenu : page de garde, synthèse dirigeant (une page), matrice
+  réglementaire (obligatoire / vérifié / objectif retenu, avec le « pourquoi »
+  et l'échéance), résultats, détail par thème, feuille de route, annexes
   (réponses et commentaires, mention « indicatif »).
 - **Jamais stocké** : produit en mémoire et envoyé au navigateur.
 
@@ -463,5 +511,5 @@ data/
 4. **Arborescence** des sous-thèmes (§6) : à valider ou ajuster.
 5. **Catalogue de prestations** : liste des offres à relier aux
    recommandations.
-6. Seuils et règles de **déclenchement réglementaire** (§5.2) : à préciser
+6. Seuils et règles de **déclenchement réglementaire** (§5.3) : à préciser
    dans le pipeline de contenu.
