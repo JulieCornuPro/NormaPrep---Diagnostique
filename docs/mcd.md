@@ -141,6 +141,8 @@ erDiagram
         datetime modifie_le
         datetime finalise_le
         datetime purge_le
+        string consultant_initial "nom, si réattribué"
+        datetime reattribue_le
     }
     PROFIL_REPONSE {
         datetime saisi_le
@@ -232,6 +234,24 @@ erDiagram
    profilage change en cours de route, les réponses déjà saisies à des
    questions qui ne sont plus posées sont conservées mais ignorées du calcul.
 
+   *Exemple.* Une PME de services numériques. Au profilage, aucun lien avec
+   la finance : I6 « Sauvegardes » est en profondeur `standard`, le
+   questionnaire pose I6-Q01 et I6-Q02. En entretien, on apprend que le
+   client héberge l'outil de gestion d'une banque : le consultant corrige P06
+   (« prestataire IT pour la finance »), DORA est retenu, I6 passe en
+   `renforce` et la question I6-Q03 apparaît, à remplir. Les réponses à
+   I6-Q01 et I6-Q02 sont intactes.
+
+   Cas inverse : P13 avait été coché par erreur, le CRA était retenu et la
+   question A3-Q04 (`renforce`, SBOM) a reçu une réponse. Le consultant
+   corrige P13, le CRA est écarté, A3 redescend en `standard` : A3-Q04
+   disparaît du questionnaire et du calcul, mais sa réponse reste en base. Si
+   le CRA est de nouveau retenu, elle réapparaît sans ressaisie.
+
+   À la finalisation, SCORE fige ce qui a réellement compté ; les réponses
+   hors périmètre restent en base (traçabilité) mais n'apparaissent pas dans
+   le rapport.
+
 7. **SCORE fige les résultats à la finalisation** (score, cible, écart,
    réglementation qui fixe la cible). Le rapport d'un diagnostic finalisé ne
    bouge donc plus, même si le référentiel change. C'est aussi la base de la
@@ -246,8 +266,12 @@ erDiagram
    - Un diagnostic **jamais finalisé** est purgé selon la même durée,
      comptée depuis sa dernière modification, pour éviter les brouillons
      oubliés.
-   - Si un consultant est supprimé de WordPress, ses diagnostics le sont
-     aussi.
+   - Si un consultant est supprimé de WordPress, ses diagnostics sont
+     **réattribués à l'administrateur** (compte désigné dans les réglages,
+     par défaut le premier administrateur), pour la traçabilité. Le nom du
+     consultant d'origine et la date sont conservés dans `consultant_initial`
+     et `reattribue_le`. La purge selon la durée de conservation continue de
+     s'appliquer à ces diagnostics.
 
 9. **Pas de clés étrangères déclarées en base**, comme dans le quiz :
    `dbDelta` les gère mal. L'intégrité (suppressions en cascade, contrôles)
