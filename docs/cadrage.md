@@ -127,11 +127,21 @@ Le profilage remplit deux rôles :
 | P11 | Fournisseur d'organisations soumises à NIS2 | oui / non |
 | P12 | Développe ou fait développer des applications | non / interne uniquement / exposées à des clients |
 | P13 | Produits mis sur le marché avec éléments numériques (logiciel, objet connecté) | oui / non |
+| P14 | Activités visées par NIS2 quelle que soit la taille (choix multiple) | services de confiance qualifiés / services de confiance non qualifiés / registre de noms de domaine de premier niveau / services DNS / réseaux ou services de communications électroniques publics / aucune |
+| P15 | Désignation par une autorité (entité critique, fournisseur unique d'un service essentiel, entité désignée NIS2) | oui / non / ne sait pas |
 
-P01 à P11 reprennent le périmètre du simulateur. P12 et P13 sont propres au
-diagnostic : P12 ajuste la **profondeur** de l'axe Applicatif (P12 = « non »
-propose de le marquer N/A), P13 rend le déclenchement du CRA indépendant du
-seul secteur.
+P01 à P11 reprennent le périmètre du simulateur. Les suivantes sont propres
+au diagnostic :
+
+- P12 ajuste la **profondeur** de l'axe Applicatif (P12 = « non » propose de
+  le marquer N/A) ;
+- P13 rend le déclenchement du CRA indépendant du seul secteur ;
+- P14 et P15 lèvent les cas que le simulateur laisse « à vérifier » : ce sont
+  des questions de fait, le consultant les pose pendant l'entretien.
+
+La taille NIS2 suit la recommandation européenne sur les PME (effectif
+**et** chiffre d'affaires ou bilan). Les tranches de P02 en sont une
+approximation ; un cas limite se règle par le forçage manuel du consultant.
 
 ### 5.2 Trois niveaux d'assujettissement
 
@@ -153,9 +163,9 @@ consultant est l'expert qui lève les « à vérifier » pendant l'entretien.
 | `SOCLE` | Obligatoire | Toujours : hygiène de base (guide ANSSI) |
 | `RGPD` | Obligatoire | P03 ≠ aucune ; renforcé si données sensibles (AIPD, DPO) |
 | `RGPD-ST` | Obligatoire | P04 = oui (obligations du sous-traitant) |
-| `NIS2-EE` | Obligatoire | Secteur annexe I et ETI ou grande entreprise ; administration publique |
-| `NIS2-EI` | Obligatoire | Secteur annexe II et ETI ou grande entreprise ; secteur NIS2 et PME |
-| `NIS2-VERIF` | À vérifier | Secteur NIS2 et TPE ; éditeur de logiciels hors services cloud/MSP |
+| `NIS2-EE` | Obligatoire | Secteur annexe I et ETI ou grande entreprise ; P14 = services de confiance qualifiés, registre TLD ou DNS (toute taille) ; P14 = communications électroniques publiques et au moins PME ; P15 = oui (entité critique) ; administration centrale |
+| `NIS2-EI` | Obligatoire | Secteur annexe I et PME ; secteur annexe II et au moins PME ; P14 = services de confiance non qualifiés ou communications électroniques publiques et TPE ; P15 = oui (autre désignation) |
+| `NIS2-VERIF` | À vérifier | P15 = « ne sait pas » et secteur NIS2 ; collectivités territoriales tant que les seuils de la loi française ne sont pas saisis dans le référentiel |
 | `NIS2-CHAINE` | À vérifier | P11 = oui et non assujetti directement (exigences répercutées par contrat, art. 21.2.d) |
 | `DORA` | Obligatoire | Banque / Finance / Assurance, ou P06 = établissement ou prestataire IT |
 | `NIS2-DORA` | À vérifier | NIS2 et DORA cumulés : DORA *lex specialis* pour le risque TIC (art. 4 NIS2) |
@@ -169,15 +179,30 @@ consultant est l'expert qui lève les « à vérifier » pendant l'entretien.
 | `EBIOS-RM` | Recommandé | Au moins une obligation ou NIS2 |
 | `ISO27005` | Recommandé | Au moins deux obligations |
 
-Points relevés dans la logique du simulateur, à corriger chez nous :
+Corrections apportées par rapport à la logique du simulateur :
 
-- un **prestataire de services managés** (ESN, MSP, MSSP) relève de
-  l'annexe I de NIS2 dès la taille moyenne ; le secteur « Conseil / IT / ESN »
-  combiné à P10 = oui doit donc déclencher NIS2, ce que le simulateur ne fait
-  pas ;
-- certaines entités (fournisseurs DNS, registres de noms de domaine,
-  prestataires de confiance qualifiés, administrations) sont visées **quelle
-  que soit leur taille** : à traiter en « à vérifier » plutôt qu'en exclusion.
+- **Services managés et cloud.** P10 = oui range l'organisation dans
+  l'annexe I de NIS2 (gestion des services TIC, informatique en nuage,
+  centres de données), quel que soit le secteur déclaré : une ESN, un MSP,
+  un MSSP ou un éditeur SaaS devient entité importante dès la PME et
+  essentielle à partir de l'ETI. Le simulateur ne le faisait que pour le
+  secteur « Éditeurs logiciels ».
+- **Éditeur de logiciels sans service cloud.** Il n'est pas visé
+  directement par NIS2 (pas de « à vérifier ») ; il relève du CRA et, s'il a
+  des clients assujettis, de NIS2 par ricochet.
+- **Entités visées quelle que soit leur taille.** P14 les classe
+  directement : services de confiance qualifiés, registres TLD et DNS en
+  entité essentielle ; services de confiance non qualifiés et opérateurs de
+  communications électroniques de petite taille en entité importante.
+- **TPE d'un secteur NIS2** sans activité P14 ni désignation : non assujettie
+  directement (le simulateur la laissait « à vérifier »).
+- **Désignation par l'autorité** : seul cas qui reste réellement « à
+  vérifier » quand le client ne sait pas répondre ; le consultant le note
+  comme point à confirmer dans le rapport.
+- **Collectivités territoriales** : leur périmètre dépend de la loi
+  française de transposition. Les seuils (type de collectivité, population)
+  sont un **paramètre du référentiel**, à saisir d'après le texte en vigueur ;
+  P07 recueille déjà le type et la population.
 
 Chaque réglementation porte aussi, dans le référentiel : une description, le
 critère qui l'a déclenchée (« Pourquoi »), l'échéance d'application et les
