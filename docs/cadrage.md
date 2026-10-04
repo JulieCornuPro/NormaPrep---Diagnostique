@@ -79,7 +79,7 @@ est manuelle, par l'administrateur.
 
 1. **Fiche mission** — créée par le consultant ; le diagnostic est en statut
    `brouillon`.
-2. **Profilage réglementaire** — treize questions sur l'organisation. Les
+2. **Profilage réglementaire** — quinze questions sur l'organisation. Les
    réglementations ressortent en trois niveaux (obligatoire, à vérifier,
    recommandé). Le consultant tranche les « à vérifier », choisit les
    objectifs recommandés et peut forcer ou retirer une réglementation, avec
