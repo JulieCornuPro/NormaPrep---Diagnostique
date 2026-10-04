@@ -1,7 +1,7 @@
 # NormaPrep Diagnostic — Note de cadrage
 
-> Statut : **projet**, à valider avant tout développement.
-> Version 0.1, octobre 2026.
+> Statut : **validé**, base du développement (évolutif au fil des recherches).
+> Version 0.2, octobre 2026.
 
 ---
 
@@ -403,12 +403,19 @@ Bibliothèque gérée dans le référentiel. Chaque recommandation :
 - se déclenche quand le niveau constaté est **inférieur à un seuil** ;
 - porte une **priorité** calculée (écart × poids), un **effort** estimé
   (faible / moyen / élevé) et un indicateur **quick win** ;
-- peut être reliée à une **prestation** du catalogue (PSSI, analyse de risques
-  EBIOS RM, test d'intrusion, accompagnement ISO 27001, mise en conformité
-  NIS2, sensibilisation…).
+- pourra être reliée à une **prestation** du catalogue (PSSI, analyse de
+  risques EBIOS RM, test d'intrusion, accompagnement ISO 27001, mise en
+  conformité NIS2, sensibilisation…).
 
 Le rapport présente ainsi une **feuille de route** : quick wins, puis actions
-à 6 mois, puis actions à 12 mois et plus, chacune avec l'offre correspondante.
+à 6 mois, puis actions à 12 mois et plus.
+
+**Première version : recommandations déclaratives, sans catalogue.** Le
+périmètre des offres n'est pas encore arrêté. Le lien vers une prestation est
+donc **facultatif** dans le modèle : la table `npd_prestation` et le champ de
+liaison existent dès le départ, mais restent vides. Le catalogue pourra être
+renseigné plus tard, sans migration ni reprise des diagnostics existants ; le
+rapport affichera alors l'offre en face de chaque action.
 
 ### 9.3 Rapport PDF
 
@@ -416,8 +423,12 @@ Le rapport présente ainsi une **feuille de route** : quick wins, puis actions
   `vendor/`, aucune dépendance externe à l'exécution).
 - **Charte CARTO** : polices Syncopate (titres), Rajdhani (texte), Inconsolata
   (références), embarquées dans le plugin ; mêmes couleurs d'accent.
-- Variante **fond clair** pour l'impression (le fond navy du site consomme
-  beaucoup d'encre), avec bandeaux et accents navy/teal. *À valider.*
+- **Fond clair**, avec bandeaux et accents navy/teal. Le PDF est d'abord un
+  document de travail lu à l'écran, mais il doit rester **accessible** : lisible
+  par le client, imprimable au besoin, contrasté. Sur fond clair, l'ambre et le
+  teal du site manquent de contraste pour du texte ou des traits fins : le PDF
+  en utilise des **variantes foncées** pour le texte et les tracés, et garde
+  les teintes d'origine pour les aplats.
 - Radar produit en **SVG simple** (polygones) côté serveur. Le support SVG de
   Dompdf est limité : à valider tôt par un prototype.
 - Contenu : page de garde, synthèse dirigeant (une page), matrice
@@ -528,13 +539,19 @@ data/
 
 ---
 
-## 13. Points à trancher
+## 13. Décisions
 
-1. Variante **fond clair** du PDF : d'accord ?
-2. **Couleurs** des trois grands thèmes (§9.1).
-3. **Durée de conservation** par défaut : 12 mois après finalisation ?
-4. **Arborescence** des sous-thèmes (§6) : à valider ou ajuster.
-5. **Catalogue de prestations** : liste des offres à relier aux
-   recommandations.
-6. Seuils et règles de **déclenchement réglementaire** (§5.3) : à préciser
-   dans le pipeline de contenu.
+| Sujet | Décision |
+|---|---|
+| Rapport PDF | Fond clair, charte CARTO, priorité à l'accessibilité (§9.3) |
+| Couleurs des grands thèmes | Ambre / teal / orange clair (§9.1), ajustables après rendu |
+| Durée de conservation | 12 mois après finalisation, réglable |
+| Arborescence | Validée (§6) |
+| Catalogue de prestations | **Reporté** : recommandations déclaratives en première version, liaison prévue dans le modèle (§9.2) |
+| Règles de déclenchement réglementaire | Validées (§5.3), appelées à évoluer ; elles vivent dans le référentiel, donc modifiables par import sans toucher au code |
+
+### Reste ouvert
+
+- Seuils de la loi française pour les collectivités territoriales (§5.3).
+- Lisibilité du radar à 26 axes, à juger sur le premier rendu (§9.1).
+- Prototype Dompdf (polices, SVG) à faire en tout début du lot 6.
