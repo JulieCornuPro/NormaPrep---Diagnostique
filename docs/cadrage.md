@@ -507,20 +507,24 @@ un **import rejouable** fondé sur des références stables (`G3`, `G3-Q01`,
 `G3-Q01-R1`), et un **pipeline de production du contenu**. Ce pipeline fera
 l'objet d'une conversation dédiée.
 
-Découpage envisagé :
+Découpage retenu (détail et règles : `docs/format-donnees.md`) :
 
 ```
 data/
-  _referentiel.json        <- version, thèmes, échelle
-  _profilage.json          <- questions de profilage, règles, réglementations
-  _exigences.json          <- matrice réglementation × sous-thème
-  _prestations.json        <- catalogue des offres
+  _referentiel.json        <- version, thèmes
+  _profilage.json          <- questions de profilage et leurs choix
+  _reglementations.json    <- réglementations, règles de déclenchement,
+                              exigences (profondeur et cible par sous-thème)
+  _prestations.json        <- catalogue des offres (facultatif)
   G_gouvernance/
     G1_pilotage.json       <- sous-thème : questions, niveaux, recommandations
     ...
   I_infrastructure/
   A_applicatif/
 ```
+
+L'import est **tout ou rien** : les fichiers sont validés en entier avant
+toute écriture, puis écrits dans une transaction.
 
 ---
 
@@ -529,7 +533,7 @@ data/
 | Lot | Contenu |
 |---|---|
 | 0 | Cadrage (ce document) |
-| 1 | Socle du plugin : activation, tables, rôle consultant, réglages, import du référentiel, suppression et purge |
+| 1 | Socle du plugin : activation, tables, rôle consultant, réglages, import du référentiel, suppression et purge — **livré** |
 | 2 | Contenu : pipeline et premier référentiel (conversation dédiée, peut avancer en parallèle) |
 | 3 | Espace consultant : liste des diagnostics, fiche mission, profilage |
 | 4 | Questionnaire : navigation, saisie, sauvegarde, progression, finalisation |
