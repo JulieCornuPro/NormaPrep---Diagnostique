@@ -71,6 +71,26 @@
               "dns"
             ]
           }
+        },
+        {
+          "ref": "R3",
+          "niveau": "obligatoire",
+          "critere": "Désignée par une autorité.",
+          "conditions": {
+            "P15": [
+              "oui"
+            ]
+          }
+        },
+        {
+          "ref": "R4",
+          "niveau": "a_verifier",
+          "critere": "Désignation par une autorité inconnue du client : à confirmer.",
+          "conditions": {
+            "P15": [
+              "ne_sait_pas"
+            ]
+          }
         }
       ],
       "exigences": {
@@ -119,6 +139,36 @@
         "I6": {
           "profondeur": "renforce",
           "cible": 4
+        }
+      }
+    },
+    {
+      "code": "ISO27001",
+      "libelle": "ISO/IEC 27001",
+      "nature": "referentiel",
+      "description": "Système de management de la sécurité de l'information, certifiable.",
+      "regles": [
+        {
+          "ref": "R1",
+          "niveau": "recommande",
+          "critere": "Référence internationale, attendue par les clients et partenaires.",
+          "conditions": {
+            "toujours": true
+          }
+        }
+      ],
+      "exigences": {
+        "G3": {
+          "profondeur": "standard",
+          "cible": 3
+        },
+        "I6": {
+          "profondeur": "standard",
+          "cible": 3
+        },
+        "A4": {
+          "profondeur": "standard",
+          "cible": 3
         }
       }
     }

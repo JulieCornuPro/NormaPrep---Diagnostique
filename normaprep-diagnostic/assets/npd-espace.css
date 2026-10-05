@@ -1,0 +1,411 @@
+/**
+ * NormaPrep Diagnostic — espace consultant.
+ *
+ * La coquille (barre latérale, titres, cartes de statistiques, tableaux,
+ * filtres) est COPIÉE de l'espace membre de NormaPrep Quiz (npq-espace.css)
+ * et renommée sous .npd-app : le plugin reste autonome si le quiz disparaît.
+ *
+ * Les couleurs reprennent les tokens du thème CARTO quand il est actif
+ * (var(--carto-…)), avec les valeurs du quiz en repli.
+ */
+
+.npd-app{
+  --bg:#0A0E1A;
+  --bg-2:#0D1220;
+  --surface:var(--carto-surface,#111827);
+  --surface-2:var(--carto-surface-2,#161E2E);
+  --border:var(--carto-border,#1F2A3D);
+  --teal:var(--carto-teal,#00CFCF);
+  --teal-dim:rgba(0,207,207,0.12);
+  --orange:#FF7A50;
+  --orange-dim:rgba(255,122,80,0.12);
+  --amber:var(--carto-amber,#E8B84B);
+  --amber-dim:rgba(232,184,75,0.12);
+  --green:#4ADE80;
+  --text:var(--carto-text,#E7ECF5);
+  --text-lo:#8B98B3;
+  --muted:#4B5875;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --sidebar-w:264px;
+  --sidebar-w-collapsed:76px;
+  --npd-header-h:64px;
+  /* Couleurs des grands thèmes (cadrage §9.1). */
+  --theme-g:var(--carto-amber,#E8B84B);
+  --theme-i:var(--carto-teal,#00CFCF);
+  --theme-a:var(--carto-orange-lt,#FF9466);
+
+  background:var(--bg); color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.npd-app *{box-sizing:border-box;margin:0;padding:0;}
+.npd-app a{color:inherit;text-decoration:none;}
+.npd-app a:hover{color:var(--teal);}
+.npd-app .mono{font-family:'Inconsolata',monospace;}
+
+/* ============ SHELL ============ */
+.npd-app .shell{ display:flex; min-height:70vh; align-items:stretch; }
+
+/* ============ SIDEBAR ============ */
+.npd-app .sidebar{
+  width:var(--sidebar-w); flex-shrink:0;
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  transition:width .3s var(--ease);
+  /* Collante : le menu (et son bouton de repli) restent visibles quand on fait
+     défiler une page longue. Sans cela, le bouton se retrouve tout en bas.
+
+     L'en-tête du thème est fixe et fait 64px : la barre se cale juste dessous
+     (top:64px) et ne fait que la hauteur restante (100vh - 64px). Sans cette
+     soustraction, son bas — donc le bouton de repli — dépasserait sous l'écran. */
+  position:sticky;
+  top:var(--npd-header-h);
+  height:calc(100vh - var(--npd-header-h));
+  align-self:flex-start;
+}
+/* La zone de navigation défile si les entrées dépassent, mais le bloc du bas
+   (bouton de repli) reste collé en bas de la barre. */
+.npd-app .side-nav{ overflow-y:auto; }
+.npd-app .side-bottom{ margin-top:auto; }
+.npd-app .shell.collapsed .sidebar{ width:var(--sidebar-w-collapsed); }
+.npd-app .side-user{ display:flex; align-items:center; gap:14px; padding:24px 22px; border-bottom:1px solid var(--border); }
+.npd-app .side-user .avatar{
+  width:40px; height:40px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,var(--teal),#1a8f7c);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syncopate',sans-serif; font-weight:700; font-size:15px; color:#06251f;
+}
+.npd-app .side-user .su-meta{ overflow:hidden; }
+.npd-app .side-user .su-name{ font-size:16px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.npd-app .side-user .su-status{ font-family:'Inconsolata',monospace; font-size:12px; color:var(--green); letter-spacing:0.04em; margin-top:3px; white-space:nowrap; }
+.npd-app .side-user .su-status.inactif{ color:var(--orange); }
+.npd-app .shell.collapsed .su-meta{ display:none; }
+.npd-app .shell.collapsed .side-user{ justify-content:center; padding:24px 0; }
+
+.npd-app .side-nav{ flex:1; overflow-y:auto; padding:20px 14px; display:flex; flex-direction:column; gap:2px; }
+.npd-app .side-group-label{
+  font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:0.16em;
+  text-transform:uppercase; color:var(--muted); padding:16px 12px 8px;
+}
+.npd-app .shell.collapsed .side-group-label{ text-align:center; padding:16px 0 8px; font-size:0; }
+.npd-app .shell.collapsed .side-group-label::after{ content:'···'; font-size:12px; }
+.npd-app .side-link{
+  display:flex; align-items:center; gap:14px;
+  padding:11px 12px; border-radius:8px; position:relative;
+  color:var(--text-lo); font-size:16px; font-weight:500;
+  transition:background .2s var(--ease), color .2s var(--ease); white-space:nowrap;
+}
+.npd-app .side-link:hover{ background:rgba(255,255,255,0.04); color:var(--text); }
+.npd-app .side-link .icon{ width:20px; height:20px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.npd-app .side-link .icon svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:square; stroke-linejoin:miter; }
+.npd-app .side-link .lbl{ overflow:hidden; text-overflow:ellipsis; }
+.npd-app .side-link .badge{
+  margin-left:auto; font-family:'Inconsolata',monospace; font-size:11px; font-weight:700;
+  padding:2px 7px; border-radius:20px; background:var(--teal-dim); color:var(--teal);
+}
+.npd-app .side-link.soon{ opacity:0.55; }
+.npd-app .side-link.soon .badge{ background:var(--surface-2); color:var(--muted); }
+.npd-app .side-link.active{ color:var(--teal); background:var(--teal-dim); }
+.npd-app .side-link.active::before{ content:''; position:absolute; left:-14px; top:8px; bottom:8px; width:3px; background:var(--teal); }
+.npd-app .shell.collapsed .side-link .lbl, .npd-app .shell.collapsed .side-link .badge{ display:none; }
+.npd-app .shell.collapsed .side-link{ justify-content:center; padding:11px 0; }
+.npd-app .side-divider{ height:1px; background:var(--border); margin:14px 12px; }
+.npd-app .side-bottom{ padding:16px 14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:2px; }
+.npd-app .collapse-btn{
+  display:flex; align-items:center; gap:14px; padding:11px 12px; border-radius:8px;
+  color:var(--text-lo); font-size:14px; font-weight:600; cursor:pointer; background:transparent; border:none;
+  width:100%; text-align:left; font-family:'Rajdhani',sans-serif;
+}
+.npd-app .collapse-btn:hover{ background:rgba(255,255,255,0.04); color:var(--text); }
+.npd-app .collapse-btn .icon svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; transition:transform .3s var(--ease); }
+.npd-app .shell.collapsed .collapse-btn .icon svg{ transform:rotate(180deg); }
+.npd-app .shell.collapsed .collapse-btn .lbl{ display:none; }
+.npd-app .shell.collapsed .collapse-btn{ justify-content:center; }
+
+@media (max-width:880px){
+  .npd-app .shell{ flex-direction:column; }
+  .npd-app .sidebar{
+    width:100%; border-right:none; border-bottom:1px solid var(--border);
+    /* En mobile la barre passe au-dessus du contenu : le collant et la hauteur
+       d'écran n'ont plus lieu d'être (ils occuperaient tout l'écran). */
+    position:static;
+    height:auto;
+  }
+
+  /* La barre latérale ne doit pas repousser le contenu hors de l'écran :
+     on la rend COMPACTE — entrées en ligne, sans les libellés de groupe,
+     sans le bouton de repli (qui n'a aucun sens ici). */
+  .npd-app .side-user{ padding:16px 18px; }
+  .npd-app .side-nav{
+    flex-direction:row; flex-wrap:wrap; gap:6px;
+    padding:12px 14px; overflow-x:auto;
+  }
+  .npd-app .side-group-label{ display:none; }
+  .npd-app .side-divider{ display:none; }
+  .npd-app .side-bottom{ display:none; }
+  .npd-app .side-link{
+    padding:8px 12px; font-size:14px; white-space:nowrap;
+  }
+  .npd-app .side-link.active::before{ display:none; }
+  /* Les entrées « à venir » n'encombrent pas l'écran mobile. */
+  .npd-app .side-link.soon{ display:none; }
+  .npd-app .side-link .badge{ display:none; }
+}
+
+/* ============ MAIN ============ */
+.npd-app .main{ flex:1; min-width:0; padding:48px 56px 80px;
+  background:linear-gradient(rgba(0,207,207,0.02) 1px,transparent 1px), linear-gradient(90deg,rgba(0,207,207,0.02) 1px,transparent 1px);
+  background-size:56px 56px, 56px 56px;
+}
+@media (max-width:640px){ .npd-app .main{ padding:32px 24px 60px; } }
+.npd-app .crumb{ font-family:'Inconsolata',monospace; font-size:13px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-lo); margin-bottom:18px; }
+.npd-app .crumb .sep{ margin:0 8px; color:var(--muted); }
+.npd-app .crumb .cur{ color:var(--orange); }
+.npd-app .page-title{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:56px; text-transform:uppercase; color:#fff; letter-spacing:0.01em; line-height:1; }
+.npd-app .title-rule{ width:220px; height:2px; background:linear-gradient(to right,var(--teal),transparent); margin:22px 0 40px; }
+.npd-app .greet{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:30px; text-transform:uppercase; color:#fff; margin-bottom:14px; }
+.npd-app .status-line{ font-size:17px; color:var(--text-lo); margin-bottom:30px; }
+.npd-app .status-line .val{ color:var(--green); font-weight:600; }
+.npd-app .status-line .val.inactif{ color:var(--orange); }
+.npd-app .cta-row{ display:flex; gap:16px; margin-bottom:44px; flex-wrap:wrap; }
+.npd-app .btn{
+  font-family:'Inconsolata',monospace; font-size:14px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+  padding:15px 30px; border:none; cursor:pointer; transition:transform .2s var(--ease), box-shadow .2s var(--ease); text-decoration:none; display:inline-block;
+}
+.npd-app .btn-primary{ background:var(--teal); color:#06251f; }
+.npd-app .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,207,207,0.25); color:#06251f; }
+.npd-app .btn-ghost{ background:transparent; color:var(--text); border:1px solid var(--border); }
+.npd-app .btn-ghost:hover{ border-color:var(--teal); color:var(--teal); transform:translateY(-2px); }
+
+.npd-app .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:52px; }
+@media (max-width:980px){ .npd-app .stat-grid{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:520px){ .npd-app .stat-grid{ grid-template-columns:1fr; } }
+.npd-app .stat-card{ background:var(--surface); border:1px solid var(--border); padding:22px 24px; border-left:3px solid var(--teal); }
+.npd-app .stat-card .sc-label{ font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-lo); margin-bottom:10px; }
+.npd-app .stat-card .sc-val{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:32px; color:#fff; }
+.npd-app .stat-card .sc-val span{ font-size:18px; color:var(--text-lo); font-weight:500; }
+.npd-app .stat-card.soon .sc-val{ color:var(--muted); font-size:20px; }
+
+.npd-app .sec-title{ font-family:'Rajdhani',sans-serif; font-weight:700; font-size:24px; text-transform:uppercase; color:#fff; margin-bottom:20px; }
+.npd-app .tab-row{ display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap; }
+.npd-app .tab{
+  font-family:'Inconsolata',monospace; font-size:13px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  padding:9px 18px; border:1px solid var(--border); background:transparent; color:var(--text-lo); cursor:pointer;
+}
+.npd-app .tab.active{ border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+.npd-app table{ width:100%; border-collapse:collapse; margin-bottom:48px; }
+.npd-app thead th{
+  background:var(--surface-2); text-align:left; padding:13px 20px;
+  font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-lo);
+  border-bottom:1px solid var(--border);
+}
+.npd-app tbody td{ padding:16px 20px; border-bottom:1px solid var(--border); font-size:16px; color:var(--text); }
+.npd-app tbody tr:last-child td{ border-bottom:none; }
+.npd-app .result-ok{ color:var(--green); }
+.npd-app .result-ko{ color:var(--orange); }
+.npd-app .result-pending{ color:var(--orange); }
+.npd-app .row-action{ font-family:'Inconsolata',monospace; font-size:13px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--teal); }
+.npd-app .empty{ color:var(--text-lo); font-size:16px; padding:24px 0; }
+.npd-app .quick-links{ display:flex; gap:32px; flex-wrap:wrap; padding-top:8px; border-top:1px solid var(--border); }
+.npd-app .quick-links a{ font-size:16px; text-decoration:underline; text-decoration-color:var(--border); text-underline-offset:4px; color:var(--text-lo); }
+.npd-app .quick-links a:hover{ color:var(--teal); text-decoration-color:var(--teal); }
+
+/* ---- Filtres du tableau des examens ---- */
+.npd-app .npd-filtres{
+  display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;
+}
+.npd-app .npd-filtre{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:'Inconsolata',monospace; font-size:13px; font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  padding:9px 16px; cursor:pointer;
+  background:transparent; color:var(--text-lo);
+  border:1px solid var(--border);
+  transition:border-color .15s var(--ease), color .15s var(--ease), background .15s var(--ease);
+}
+.npd-app .npd-filtre:hover{ border-color:var(--teal); color:var(--teal); }
+.npd-app .npd-filtre.actif{
+  border-color:var(--teal); color:var(--teal); background:var(--teal-dim);
+}
+.npd-app .npd-filtre-nb{
+  font-size:11px; padding:1px 7px;
+  background:var(--surface-2); color:var(--muted); border-radius:20px;
+}
+.npd-app .npd-filtre.actif .npd-filtre-nb{
+  background:rgba(0,207,207,0.2); color:var(--teal);
+}
+
+/* Message quand un filtre ne renvoie rien */
+.npd-app .npd-table-vide{
+  color:var(--muted); font-size:15px; font-style:italic;
+  padding:24px 0; margin-bottom:40px;
+}
+.npd-app .npd-table-note{
+  font-family:'Inconsolata',monospace; font-size:12px;
+  color:var(--muted); letter-spacing:0.04em; margin-top:-32px; margin-bottom:40px;
+}
+
+/* =====================================================================
+ * COMPOSANTS PROPRES AU DIAGNOSTIC
+ * ===================================================================== */
+
+.npd-app .screen-reader-text{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+.npd-app .crumb a{ color:var(--text-lo); }
+.npd-app .crumb a:hover{ color:var(--teal); }
+.npd-app .page-title{ font-size:clamp(34px,5vw,56px); overflow-wrap:anywhere; }
+.npd-app .npd-texte{ color:var(--text-lo); font-size:17px; max-width:760px; margin-bottom:28px; line-height:1.5; }
+.npd-app .npd-sous-texte{ color:var(--muted); font-size:14px; margin-top:4px; }
+.npd-app fieldset{ border:none; min-width:0; }
+.npd-app fieldset[disabled]{ opacity:.75; }
+
+/* ---- Étapes d'un diagnostic ---- */
+.npd-app .npd-etapes{ list-style:none; display:flex; flex-wrap:wrap; gap:8px; margin:-12px 0 32px; }
+.npd-app .npd-etape > a, .npd-app .npd-etape > span{
+  display:flex; align-items:center; gap:10px; padding:9px 16px;
+  border:1px solid var(--border); background:var(--surface);
+  font-family:'Inconsolata',monospace; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-lo);
+}
+.npd-app .npd-etape > a:hover{ border-color:var(--teal); color:var(--teal); }
+.npd-app .npd-etape .num{
+  width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  background:var(--surface-2); color:var(--text-lo); font-size:12px;
+}
+.npd-app .npd-etape.courante > span{ border-color:var(--teal); color:var(--teal); background:var(--teal-dim); }
+.npd-app .npd-etape.courante .num{ background:var(--teal); color:#06251f; }
+.npd-app .npd-etape.inactive > span{ opacity:.45; }
+.npd-app .npd-etape .bientot{ font-size:10px; color:var(--muted); letter-spacing:.04em; }
+
+/* ---- Messages ---- */
+.npd-app .npd-msg{ padding:14px 18px; margin-bottom:24px; border:1px solid var(--border); border-left:3px solid var(--teal); background:var(--surface); font-size:16px; max-width:900px; }
+.npd-app .npd-msg a{ color:var(--teal); text-decoration:underline; }
+.npd-app .npd-msg ul{ list-style:none; display:flex; flex-direction:column; gap:4px; }
+.npd-app .npd-msg-succes{ border-left-color:var(--green); }
+.npd-app .npd-msg-erreur{ border-left-color:var(--orange); background:linear-gradient(90deg,var(--orange-dim),transparent 60%), var(--surface); }
+.npd-app .npd-msg-attention{ border-left-color:var(--amber); background:linear-gradient(90deg,var(--amber-dim),transparent 60%), var(--surface); }
+.npd-app .npd-msg-info{ border-left-color:var(--text-lo); }
+.npd-app .npd-avertissement{ font-family:'Inconsolata',monospace; font-size:13px; color:var(--muted); margin-bottom:28px; }
+
+/* ---- Confidentialité ---- */
+.npd-app .npd-confidentialite{
+  max-width:760px; margin-bottom:24px; padding:14px 18px; font-size:15px; line-height:1.5; color:var(--text-lo);
+  border:1px dashed var(--border);
+}
+.npd-app .npd-confidentialite strong{ color:var(--amber); }
+
+/* ---- Cartes et formulaires ---- */
+.npd-app .npd-carte{ background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--teal); padding:24px 26px; margin-bottom:18px; }
+.npd-app .npd-form.npd-carte{ max-width:760px; }
+.npd-app .npd-form label{ display:block; font-size:15px; font-weight:600; color:var(--text-lo); margin-bottom:18px; }
+.npd-app .npd-form .requis{ font-family:'Inconsolata',monospace; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--amber); margin-left:6px; }
+.npd-app .npd-form input[type="text"],
+.npd-app .npd-form input[type="date"],
+.npd-app .npd-form textarea,
+.npd-app .npd-form select{
+  display:block; width:100%; margin-top:7px; padding:12px 14px;
+  background:var(--bg-2); border:1px solid var(--border); border-radius:4px;
+  color:var(--text); font-family:'Rajdhani',sans-serif; font-size:16px; line-height:1.4;
+}
+.npd-app .npd-form input[type="date"]{ max-width:240px; color-scheme:dark; }
+.npd-app .npd-form textarea{ resize:vertical; }
+.npd-app .npd-form input:focus, .npd-app .npd-form textarea:focus, .npd-app .npd-form select:focus{
+  outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,207,207,0.15);
+}
+.npd-app .npd-boutons{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:8px; }
+.npd-app .npd-boutons-collants{
+  position:sticky; bottom:0; z-index:2; padding:16px 0; margin-top:8px;
+  background:linear-gradient(transparent, var(--bg) 30%);
+}
+.npd-app .npd-progression{ color:var(--text-lo); font-size:14px; margin-right:auto; }
+.npd-app .btn:focus-visible, .npd-app a:focus-visible, .npd-app button:focus-visible, .npd-app input:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+
+/* ---- Choix (profilage et décisions) ---- */
+.npd-app .npd-choix, .npd-app .npd-decision{ display:flex; flex-wrap:wrap; gap:10px; }
+.npd-app .npd-choix-item{
+  display:flex !important; align-items:center; gap:10px; margin:0 !important;
+  padding:10px 16px; border:1px solid var(--border); background:var(--bg-2);
+  font-size:16px !important; font-weight:500 !important; color:var(--text) !important; cursor:pointer;
+  transition:border-color .15s var(--ease), background .15s var(--ease);
+}
+.npd-app .npd-choix-item:hover{ border-color:var(--teal); }
+.npd-app .npd-choix-item input{ accent-color:var(--teal); width:16px; height:16px; flex-shrink:0; }
+.npd-app .npd-choix-item:has(input:checked){ border-color:var(--teal); background:var(--teal-dim); }
+
+/* ---- Questions de profilage ---- */
+.npd-app .npd-question{ max-width:900px; }
+.npd-app .npd-question.sans-reponse{ border-left-color:var(--amber); }
+.npd-app .npd-question[hidden]{ display:none; }
+.npd-app .npd-q-entete{ display:flex; gap:14px; align-items:baseline; margin-bottom:6px; }
+.npd-app .npd-q-code{ font-size:13px; font-weight:700; color:var(--teal); letter-spacing:.06em; }
+.npd-app .npd-q-type{ font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
+.npd-app .npd-q-libelle{ font-size:20px; font-weight:700; color:#fff; margin-bottom:6px; }
+.npd-app .npd-q-aide{ color:var(--text-lo); font-size:15px; margin-bottom:12px; }
+.npd-app .npd-question .npd-choix{ margin-top:12px; }
+
+/* ---- Réglementations ---- */
+.npd-app .npd-groupe{ margin-bottom:36px; max-width:960px; }
+.npd-app .npd-groupe .sec-title{ margin-bottom:6px; display:flex; align-items:center; gap:12px; }
+.npd-app .npd-compte{ font-size:13px; padding:2px 9px; border-radius:20px; background:var(--surface-2); color:var(--text-lo); }
+.npd-app .npd-groupe-intro{ color:var(--text-lo); font-size:15px; margin-bottom:16px; }
+.npd-app .npd-groupe-obligatoire .npd-reg{ border-left-color:var(--orange); }
+.npd-app .npd-groupe-a_verifier .npd-reg{ border-left-color:var(--amber); }
+.npd-app .npd-groupe-recommande .npd-reg{ border-left-color:var(--teal); }
+.npd-app .npd-groupe-forcage .npd-reg{ border-left-color:var(--text-lo); }
+.npd-app .npd-reg.decision-ecartee{ opacity:.7; }
+.npd-app .npd-reg-entete{ display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-bottom:10px; }
+.npd-app .npd-reg-entete h3{ font-size:21px; font-weight:700; color:#fff; }
+.npd-app .npd-badge{
+  font-family:'Inconsolata',monospace; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  padding:3px 9px; border:1px solid currentColor;
+}
+.npd-app .npd-badge-obligatoire{ color:var(--orange); }
+.npd-app .npd-badge-a_verifier{ color:var(--amber); }
+.npd-app .npd-badge-recommande{ color:var(--teal); }
+.npd-app .npd-badge-retiree{ color:var(--muted); }
+.npd-app .npd-reg-pourquoi, .npd-app .npd-reg-desc{ font-size:16px; color:var(--text-lo); margin-bottom:8px; line-height:1.45; }
+.npd-app .npd-reg-pourquoi strong{ color:var(--text); }
+.npd-app .npd-reg-echeance{ font-size:13px; color:var(--text-lo); margin-bottom:8px; }
+.npd-app .npd-reg-actions{ list-style:none; display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 14px; }
+.npd-app .npd-reg-actions li{ font-family:'Inconsolata',monospace; font-size:12px; padding:3px 9px; background:var(--surface-2); color:var(--text-lo); }
+.npd-app .npd-decision{ margin:14px 0 12px; }
+.npd-app .npd-justif{ margin-bottom:0 !important; }
+.npd-app .npd-justif-lbl{ font-size:14px; }
+.npd-app .npd-justif.exigee textarea{ border-color:var(--amber); }
+.npd-app .npd-justif.manquante textarea{ border-color:var(--orange); box-shadow:0 0 0 3px var(--orange-dim); }
+.npd-app .npd-ajout{ max-width:760px; border-left-color:var(--text-lo); }
+
+/* ---- Effet sur le questionnaire ---- */
+.npd-app .npd-effet-titre{ margin-top:12px; margin-bottom:6px; }
+.npd-app table.npd-effet{ max-width:960px; }
+.npd-app .npd-ligne-theme td{
+  font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  padding:10px 20px; background:var(--surface); border-left:3px solid var(--teal);
+}
+.npd-app .npd-theme-g td{ color:var(--theme-g); border-left-color:var(--theme-g); }
+.npd-app .npd-theme-i td{ color:var(--theme-i); border-left-color:var(--theme-i); }
+.npd-app .npd-theme-a td{ color:var(--theme-a); border-left-color:var(--theme-a); }
+.npd-app .npd-code{ color:var(--text-lo); font-size:13px; margin-right:6px; }
+.npd-app .npd-profondeur{ font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.npd-app .npd-profondeur-essentiel{ color:var(--text-lo); }
+.npd-app .npd-profondeur-standard{ color:var(--teal); }
+.npd-app .npd-profondeur-renforce{ color:var(--amber); }
+
+/* ---- Liste des diagnostics ---- */
+.npd-app .npd-table-defil{ overflow-x:auto; margin-bottom:48px; }
+.npd-app .npd-table-defil table{ margin-bottom:0; min-width:720px; }
+.npd-app .npd-lien-client{ font-weight:700; color:#fff; font-size:17px; }
+.npd-app .npd-statut{ white-space:nowrap; font-family:'Inconsolata',monospace; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.npd-app .npd-statut-brouillon{ color:var(--text-lo); }
+.npd-app .npd-statut-en_cours{ color:var(--teal); }
+.npd-app .npd-statut-finalise{ color:var(--green); }
+.npd-app .npd-preavis{ color:var(--amber); font-weight:700; }
+.npd-app td.mono{ font-size:15px; color:var(--text-lo); white-space:nowrap; }
+.npd-app .npd-actions{ white-space:nowrap; text-align:right; }
+.npd-app .npd-actions > *{ margin-left:18px; }
+.npd-app .npd-form-inline{ display:inline; }
+.npd-app button.row-action{ background:none; border:none; cursor:pointer; }
+.npd-app .row-action.danger{ color:var(--orange); }
+.npd-app .row-action:hover{ text-decoration:underline; }
+.npd-app .stat-card.alerte{ border-left-color:var(--amber); }
+.npd-app .stat-card.alerte .sc-val{ color:var(--amber); }
+.npd-app .npd-table-vide[hidden]{ display:none; }
+.npd-app label.manquante textarea{ border-color:var(--orange); box-shadow:0 0 0 3px var(--orange-dim); }

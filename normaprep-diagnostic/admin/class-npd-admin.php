@@ -75,6 +75,12 @@ class NPD_Admin {
             self::PAGE_REFERENTIEL,
             [ __CLASS__, 'page_referentiel' ]
         );
+        // Lien vers l'espace consultant (page publique), où se mènent les diagnostics.
+        $page = (int) get_option( 'npd_page_espace_id' );
+        if ( $page ) {
+            global $submenu;
+            $submenu[ self::PAGE_REFERENTIEL ][] = [ 'Espace consultant ↗', NPD_Roles::CAP_MENER, get_permalink( $page ) ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+        }
         add_submenu_page(
             self::PAGE_REFERENTIEL,
             'Réglages',

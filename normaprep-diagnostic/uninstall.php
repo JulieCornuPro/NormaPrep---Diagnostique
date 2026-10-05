@@ -37,12 +37,19 @@ foreach ( NPD_Installer::TABLES as $nom ) {
     $wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL
 }
 
-// 3. Options et comptes rendus.
+// 3. Page « Espace consultant » (supprimée définitivement, pas mise à la corbeille).
+$npd_page = (int) get_option( 'npd_page_espace_id' );
+if ( $npd_page ) {
+    wp_delete_post( $npd_page, true );
+}
+delete_option( 'npd_page_espace_id' );
+
+// 4. Options et comptes rendus (dont les messages de l'espace consultant).
 delete_option( NPD_Installer::OPT_EMPREINTE );
 delete_option( 'npd_db_version' );
 delete_option( 'npd_reglages' );
 delete_option( 'npd_derniere_purge' );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_npd\\_%' OR option_name LIKE '\\_transient\\_timeout\\_npd\\_%'" );
 
-// 4. Rôle et capacités.
+// 5. Rôle et capacités.
 NPD_Roles::supprimer();

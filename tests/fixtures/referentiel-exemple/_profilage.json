@@ -83,6 +83,33 @@
           "libelle": "Aucune"
         }
       ]
+    },
+    {
+      "code": "P15",
+      "libelle": "L'organisation a-t-elle été désignée par une autorité (entité critique, entité désignée NIS2) ?",
+      "aide": "Question posée seulement si le secteur est concerné par NIS2.",
+      "type": "choix_unique",
+      "condition": {
+        "non": {
+          "P01": [
+            "autre"
+          ]
+        }
+      },
+      "choix": [
+        {
+          "code": "oui",
+          "libelle": "Oui"
+        },
+        {
+          "code": "non",
+          "libelle": "Non"
+        },
+        {
+          "code": "ne_sait_pas",
+          "libelle": "Ne sait pas"
+        }
+      ]
     }
   ]
 }

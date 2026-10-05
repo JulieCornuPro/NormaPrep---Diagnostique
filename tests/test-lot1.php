@@ -125,8 +125,8 @@ npd_verifier( 3 === npd_compter( 'sous_theme' ), '3 sous-thèmes' );
 npd_verifier( 4 === npd_compter( 'question' ), '4 questions' );
 npd_verifier( 24 === npd_compter( 'niveau' ), '24 niveaux (6 par question)' );
 npd_verifier( 3 === npd_compter( 'recommandation' ), '3 recommandations' );
-npd_verifier( 4 === npd_compter( 'profil_question' ) && 14 === npd_compter( 'profil_choix' ), 'profilage : 4 questions, 14 choix' );
-npd_verifier( 3 === npd_compter( 'reglementation' ) && 4 === npd_compter( 'regle' ) && 7 === npd_compter( 'exigence' ), 'réglementations : 3, règles : 4, exigences : 7' );
+npd_verifier( 5 === npd_compter( 'profil_question' ) && 17 === npd_compter( 'profil_choix' ), 'profilage : 5 questions, 17 choix' );
+npd_verifier( 4 === npd_compter( 'reglementation' ) && 7 === npd_compter( 'regle' ) && 10 === npd_compter( 'exigence' ), 'réglementations : 4, règles : 7, exigences : 10' );
 npd_verifier( npd_id( 'profil_choix', 'code', 'P01-energie' ) > 0, 'codes de choix préfixés (« P01-energie »)' );
 npd_verifier( npd_id( 'regle', 'ref', 'NIS2-EE-R2' ) > 0, 'références de règles préfixées (« NIS2-EE-R2 »)' );
 
@@ -147,7 +147,7 @@ foreach ( $r2['stats'] as $s ) {
     $crees += $s['crees'];
 }
 npd_verifier( $r2['succes'] && 0 === $crees, 'aucun élément créé au second passage' );
-npd_verifier( 4 === npd_compter( 'question' ) && 24 === npd_compter( 'niveau' ) && 7 === npd_compter( 'exigence' ), 'mêmes volumes qu\'au premier passage' );
+npd_verifier( 4 === npd_compter( 'question' ) && 24 === npd_compter( 'niveau' ) && 10 === npd_compter( 'exigence' ), 'mêmes volumes qu\'au premier passage' );
 npd_verifier( 1 === npd_compter( 'referentiel', 'actif = 1' ), 'une seule version active' );
 
 /* -------------------------------------------------------------------------
@@ -197,7 +197,7 @@ npd_titre( 'Retrait d\'éléments du référentiel' );
 $q02 = npd_id( 'question', 'ref', 'G3-Q02' );
 
 // On retire G3-Q01 (répondue) et G3-Q02 (jamais répondue), le choix
-// P01-energie (coché) et P01-autre (jamais coché), la réglementation DORA
+// P01-energie (coché) et P01-services_num (jamais coché), la réglementation DORA
 // (ressortie) et NIS2-EE (jamais ressortie).
 npd_json_modifier( "$travail/G_gouvernance/G3_risques.json", function ( $d ) {
     $d['questions'] = [ [
@@ -208,7 +208,7 @@ npd_json_modifier( "$travail/G_gouvernance/G3_risques.json", function ( $d ) {
 } );
 npd_json_modifier( "$travail/_profilage.json", function ( $d ) {
     $d['questions'][0]['choix'] = array_values( array_filter( $d['questions'][0]['choix'], function ( $c ) {
-        return ! in_array( $c['code'], [ 'energie', 'autre' ], true );
+        return ! in_array( $c['code'], [ 'energie', 'services_num' ], true );
     } ) );
     return $d;
 } );
@@ -228,7 +228,7 @@ npd_verifier( 1 === npd_compter( 'reponse', 'diagnostic_id = ' . $diag_id ), 'la
 npd_verifier( 0 === npd_compter( 'recommandation', "ref = 'G3-Q01-R1'" ), 'recommandation retirée supprimée' );
 npd_verifier( '1' === (string) $wpdb->get_var( 'SELECT actif FROM ' . NPD_Installer::table( 'prestation' ) . " WHERE code = 'EBIOS-RM'" ), 'prestation encore déclarée : conservée et active' );
 npd_verifier( '0' === (string) $wpdb->get_var( 'SELECT actif FROM ' . NPD_Installer::table( 'profil_choix' ) . " WHERE code = 'P01-energie'" ), 'choix coché P01-energie désactivé' );
-npd_verifier( 0 === npd_compter( 'profil_choix', "code = 'P01-autre'" ), 'choix jamais coché P01-autre supprimé' );
+npd_verifier( 0 === npd_compter( 'profil_choix', "code = 'P01-services_num'" ), 'choix jamais coché P01-services_num supprimé' );
 npd_verifier( '0' === (string) $wpdb->get_var( 'SELECT actif FROM ' . NPD_Installer::table( 'reglementation' ) . " WHERE code = 'DORA'" ), 'DORA (ressortie dans un diagnostic) désactivée' );
 npd_verifier( 0 === npd_compter( 'regle', 'reglementation_id = ' . npd_id( 'reglementation', 'code', 'DORA' ) ) && 0 === npd_compter( 'exigence', 'reglementation_id = ' . npd_id( 'reglementation', 'code', 'DORA' ) ), 'DORA désactivée perd ses règles et exigences' );
 npd_verifier( 0 === npd_compter( 'reglementation', "code = 'NIS2-EE'" ), 'NIS2-EE (jamais ressortie) supprimée' );

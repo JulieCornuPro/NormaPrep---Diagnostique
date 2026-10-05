@@ -535,7 +535,7 @@ toute écriture, puis écrits dans une transaction.
 | 0 | Cadrage (ce document) |
 | 1 | Socle du plugin : activation, tables, rôle consultant, réglages, import du référentiel, suppression et purge — **livré** |
 | 2 | Contenu : pipeline et premier référentiel (conversation dédiée, peut avancer en parallèle) |
-| 3 | Espace consultant : liste des diagnostics, fiche mission, profilage |
+| 3 | Espace consultant : liste des diagnostics, fiche mission, profilage — **livré** |
 | 4 | Questionnaire : navigation, saisie, sauvegarde, progression, finalisation |
 | 5 | Calcul et restitution écran : scores, cibles, radar, recommandations |
 | 6 | Rapport PDF |

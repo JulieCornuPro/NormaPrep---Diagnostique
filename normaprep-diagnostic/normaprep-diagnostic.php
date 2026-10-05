@@ -60,6 +60,10 @@ function npd_activation() {
     require_once NPD_PATH . 'includes/class-npd-diagnostics.php';
     require_once NPD_PATH . 'includes/class-npd-purge.php';
     NPD_Purge::planifier();
+
+    // Page « Espace consultant », qui porte tous les écrans des consultants.
+    require_once NPD_PATH . 'public/class-npd-espace.php';
+    NPD_Espace::creer_page();
 }
 register_activation_hook( __FILE__, 'npd_activation' );
 
@@ -103,6 +107,13 @@ function npd_init() {
     // Purge quotidienne des diagnostics échus.
     require_once NPD_PATH . 'includes/class-npd-purge.php';
     NPD_Purge::init();
+
+    // Profilage réglementaire : calcul des réglementations et arbitrage.
+    require_once NPD_PATH . 'includes/class-npd-profilage.php';
+
+    // Espace consultant (page publique) et cloisonnement de wp-admin.
+    require_once NPD_PATH . 'public/class-npd-espace.php';
+    NPD_Espace::init();
 
     // Administration : import du référentiel et réglages.
     if ( is_admin() ) {

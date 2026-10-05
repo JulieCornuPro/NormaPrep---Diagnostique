@@ -145,6 +145,78 @@ class NPD_Diagnostics {
     }
 
     /**
+     * Met à jour la fiche mission.
+     *
+     * @param int   $id
+     * @param array $champs client, perimetre, interlocuteurs, date_entretien.
+     */
+    public static function mettre_a_jour_mission( $id, array $champs ) {
+        global $wpdb;
+        $wpdb->update( NPD_Installer::table( 'diagnostic' ), [
+            'client'         => (string) ( $champs['client'] ?? '' ),
+            'perimetre'      => (string) ( $champs['perimetre'] ?? '' ),
+            'interlocuteurs' => (string) ( $champs['interlocuteurs'] ?? '' ),
+            'date_entretien' => $champs['date_entretien'] ?? null,
+        ], [ 'id' => (int) $id ] );
+        self::toucher( $id );
+    }
+
+    /**
+     * Change le statut (brouillon → en_cours…).
+     *
+     * @param int    $id
+     * @param string $statut
+     */
+    public static function changer_statut( $id, $statut ) {
+        global $wpdb;
+        $wpdb->update( NPD_Installer::table( 'diagnostic' ), [ 'statut' => $statut ], [ 'id' => (int) $id ] );
+    }
+
+    /**
+     * Un diagnostic finalisé n'est plus modifiable (il faudra le rouvrir).
+     *
+     * @param object $diag
+     * @return bool
+     */
+    public static function est_modifiable( $diag ) {
+        return $diag && self::STATUT_FINALISE !== $diag->statut;
+    }
+
+    /**
+     * Diagnostics visibles par un utilisateur : les siens, ou tous pour qui
+     * peut gérer le module. Les plus récemment modifiés d'abord.
+     *
+     * @param int $user_id
+     * @return object[] Avec, en plus, le nom du consultant.
+     */
+    public static function lister( $user_id ) {
+        global $wpdb;
+        $t = NPD_Installer::table( 'diagnostic' );
+
+        if ( user_can( $user_id, NPD_Roles::CAP_GERER ) ) {
+            $lignes = $wpdb->get_results( "SELECT * FROM {$t} ORDER BY modifie_le DESC, id DESC" );
+        } elseif ( user_can( $user_id, NPD_Roles::CAP_MENER ) ) {
+            $lignes = $wpdb->get_results( $wpdb->prepare(
+                "SELECT * FROM {$t} WHERE consultant_id = %d ORDER BY modifie_le DESC, id DESC",
+                $user_id
+            ) );
+        } else {
+            return [];
+        }
+
+        $noms = [];
+        foreach ( $lignes as $l ) {
+            $cid = (int) $l->consultant_id;
+            if ( ! isset( $noms[ $cid ] ) ) {
+                $u            = get_userdata( $cid );
+                $noms[ $cid ] = $u ? $u->display_name : '#' . $cid;
+            }
+            $l->consultant_nom = $noms[ $cid ];
+        }
+        return $lignes;
+    }
+
+    /**
      * Identifiant de la version active du référentiel, ou null si aucun import.
      *
      * @return int|null
