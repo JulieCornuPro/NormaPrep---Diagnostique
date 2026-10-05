@@ -507,7 +507,7 @@ un **import rejouable** fondé sur des références stables (`G3`, `G3-Q01`,
 `G3-Q01-R1`), et un **pipeline de production du contenu**. Ce pipeline fera
 l'objet d'une conversation dédiée.
 
-Découpage retenu (détail et règles : `docs/format-donnees.md`) :
+Découpage retenu (détail et règles : `normaprep-diagnostic/data/FORMAT.md`) :
 
 ```
 data/

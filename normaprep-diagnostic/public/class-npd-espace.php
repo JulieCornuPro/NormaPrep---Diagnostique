@@ -32,8 +32,11 @@ class NPD_Espace {
     /** Option portant l'identifiant de la page « Espace consultant ». */
     const OPT_PAGE = 'npd_page_espace_id';
 
-    /** Écrans disponibles. */
-    const VUES = [ 'liste', 'mission', 'profilage', 'reglementations' ];
+    /** Écrans disponibles. « mdp_oublie » est le seul accessible sans connexion. */
+    const VUES = [ 'liste', 'mission', 'profilage', 'reglementations', 'mdp_oublie' ];
+
+    /** Message unique, quelle que soit la cause de l'échec de connexion. */
+    const MESSAGE_ECHEC_CONNEXION = 'Identifiants incorrects.';
 
     /** Seuil d'affichage du préavis de purge, en jours. */
     const PREAVIS_JOURS = 30;
@@ -144,7 +147,22 @@ class NPD_Espace {
      * @param string $type succes | erreur
      */
     public static function flash( $texte, $type = 'succes' ) {
-        set_transient( 'npd_flash_' . get_current_user_id(), [ 'texte' => $texte, 'type' => $type ], MINUTE_IN_SECONDS );
+        set_transient( 'npd_flash_' . self::cle_visiteur(), [ 'texte' => $texte, 'type' => $type ], MINUTE_IN_SECONDS );
+    }
+
+    /**
+     * Clé rattachant un message au visiteur : son compte s'il est connecté,
+     * sinon une empreinte de son adresse (jamais l'adresse en clair). Sans
+     * cela, tous les visiteurs non connectés partageraient le même message.
+     *
+     * @return string
+     */
+    private static function cle_visiteur() {
+        if ( is_user_logged_in() ) {
+            return 'u' . get_current_user_id();
+        }
+        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'inconnue';
+        return 'v' . substr( md5( $ip . wp_salt() ), 0, 16 );
     }
 
     /**
@@ -153,7 +171,7 @@ class NPD_Espace {
      * @return array|null
      */
     public static function lire_flash() {
-        $cle = 'npd_flash_' . get_current_user_id();
+        $cle = 'npd_flash_' . self::cle_visiteur();
         $msg = get_transient( $cle );
         if ( $msg ) {
             delete_transient( $cle );
@@ -268,8 +286,13 @@ class NPD_Espace {
         if ( ! self::est_sur_espace() ) {
             return;
         }
+        // Visiteur non connecté : la page affiche la mire de connexion (ou le
+        // formulaire « mot de passe oublié »). Seuls ces deux formulaires
+        // sont traités.
         if ( ! is_user_logged_in() ) {
-            auth_redirect(); // vers la connexion, avec retour ici ensuite
+            nocache_headers();
+            self::traiter_formulaire_public();
+            return;
         }
         if ( ! current_user_can( NPD_Roles::CAP_MENER ) ) {
             return; // le gabarit affiche « accès réservé »
@@ -307,6 +330,132 @@ class NPD_Espace {
                 self::traiter_suppression( $diag );
                 break;
         }
+    }
+
+    /* =====================================================================
+     * MIRE DE CONNEXION ET MOT DE PASSE OUBLIÉ
+     * =====================================================================
+     * Reprise de la mire de NormaPrep Quiz : adresse email + mot de passe,
+     * limitation des tentatives, message d'échec unique. Une différence : les
+     * comptes consultants sont créés par l'administrateur, il n'y a donc ni
+     * inscription ni validation d'adresse.
+     */
+
+    /**
+     * Formulaires accessibles sans connexion.
+     */
+    private static function traiter_formulaire_public() {
+        if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || empty( $_POST['npd_action'] ) ) {
+            return;
+        }
+        $action = sanitize_key( wp_unslash( $_POST['npd_action'] ) );
+        if ( ! in_array( $action, [ 'connexion', 'mdp_oublie' ], true ) ) {
+            return;
+        }
+        if ( ! isset( $_POST['npd_nonce'] )
+            || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['npd_nonce'] ) ), self::nonce_action( $action, 0 ) ) ) {
+            self::$erreurs[] = 'La page a expiré. Rechargez-la puis recommencez.';
+            return;
+        }
+
+        $donnees = wp_unslash( $_POST );
+        if ( 'connexion' === $action ) {
+            self::traiter_connexion( $donnees );
+        } else {
+            self::traiter_mdp_oublie( $donnees );
+        }
+    }
+
+    /**
+     * Connexion d'un consultant.
+     *
+     * Seuls les comptes autorisés à mener des diagnostics peuvent se
+     * connecter ici. Sans cette restriction, un abonné du quiz dont l'adresse
+     * n'est pas encore validée contournerait la validation par ce formulaire.
+     *
+     * Compte inconnu, compte non consultant, mot de passe faux : un seul
+     * message, pour ne pas révéler quelles adresses existent.
+     *
+     * @param array $donnees $_POST déséchappé.
+     * @return bool Vrai si la connexion a réussi.
+     */
+    public static function traiter_connexion( array $donnees ) {
+        $email = sanitize_email( (string) ( $donnees['email'] ?? '' ) );
+        $mdp   = (string) ( $donnees['mdp'] ?? '' );
+
+        if ( NPD_Limitation::connexion_bloquee( $email ) ) {
+            self::$erreurs[] = sprintf(
+                'Trop de tentatives de connexion. Réessayez dans %d minutes.',
+                NPD_Limitation::minutes_restantes()
+            );
+            return false;
+        }
+
+        $user = $email ? get_user_by( 'email', $email ) : false;
+        if ( ! $user || ! user_can( $user, NPD_Roles::CAP_MENER ) ) {
+            NPD_Limitation::connexion_echouee( $email );
+            self::$erreurs[] = self::MESSAGE_ECHEC_CONNEXION;
+            return false;
+        }
+
+        $resultat = wp_signon( [
+            'user_login'    => $user->user_login,
+            'user_password' => $mdp,
+            'remember'      => ! empty( $donnees['souvenir'] ),
+        ], is_ssl() );
+
+        if ( is_wp_error( $resultat ) ) {
+            NPD_Limitation::connexion_echouee( $email );
+            self::$erreurs[] = self::MESSAGE_ECHEC_CONNEXION;
+            return false;
+        }
+
+        NPD_Limitation::connexion_reussie( $email );
+        wp_set_current_user( $resultat->ID );
+
+        // Retour à l'écran demandé (un lien vers un diagnostic, par exemple),
+        // à condition qu'il reste sur l'espace consultant.
+        $retour = (string) ( $donnees['retour'] ?? '' );
+        $base   = self::url();
+        $cible  = ( $retour && 0 === strpos( $retour, $base ) ) ? $retour : $base;
+        self::rediriger( self::sans_vue_publique( $cible ) );
+        return true;
+    }
+
+    /**
+     * Après connexion, on ne renvoie pas vers l'écran « mot de passe oublié ».
+     */
+    private static function sans_vue_publique( $url ) {
+        parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $args );
+        return ( isset( $args['npd_vue'] ) && 'mdp_oublie' === $args['npd_vue'] ) ? self::url() : $url;
+    }
+
+    /**
+     * Mot de passe oublié : envoi du lien de réinitialisation de WordPress.
+     *
+     * La réponse est toujours la même, que l'adresse corresponde ou non à un
+     * consultant. Seuls les consultants reçoivent un courriel.
+     *
+     * @param array $donnees
+     */
+    public static function traiter_mdp_oublie( array $donnees ) {
+        if ( NPD_Limitation::reinitialisation_bloquee() ) {
+            self::$erreurs[] = sprintf(
+                'Trop de demandes. Réessayez dans %d minutes.',
+                NPD_Limitation::minutes_restantes()
+            );
+            return;
+        }
+        NPD_Limitation::reinitialisation_demandee();
+
+        $email = sanitize_email( (string) ( $donnees['email'] ?? '' ) );
+        $user  = $email ? get_user_by( 'email', $email ) : false;
+        if ( $user && user_can( $user, NPD_Roles::CAP_MENER ) ) {
+            retrieve_password( $user->user_login );
+        }
+
+        self::flash( 'Si cette adresse correspond à un compte consultant, un courriel contenant un lien pour choisir un nouveau mot de passe vient d\'être envoyé.' );
+        self::rediriger( self::url() );
     }
 
     /**
@@ -590,7 +739,7 @@ class NPD_Espace {
             <?php endif; ?>
 
             <div class="side-divider"></div>
-            <a class="side-link" href="<?php echo esc_url( wp_logout_url( home_url( '/' ) ) ); ?>">
+            <a class="side-link" href="<?php echo esc_url( wp_logout_url( self::url() ) ); ?>">
               <span class="icon"><svg viewBox="0 0 24 24"><path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/></svg></span>
               <span class="lbl">Se déconnecter</span>
             </a>

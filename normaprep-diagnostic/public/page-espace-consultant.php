@@ -6,13 +6,23 @@
  * thème, barre latérale pleine hauteur, contenu au centre. L'écran affiché
  * dépend du paramètre npd_vue (voir NPD_Espace).
  *
- * La connexion est déjà exigée par NPD_Espace::controler_et_traiter().
+ * Sans connexion, la page affiche la mire (adresse email et mot de passe).
  *
  * @package NormaPrep_Diagnostic
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
+}
+
+// Visiteur non connecté : mire de connexion, sans barre latérale.
+if ( ! is_user_logged_in() ) {
+    get_header();
+    echo '<div class="npd-app"><div class="npd-mire">';
+    require NPD_PATH . 'public/vues/' . ( 'mdp_oublie' === NPD_Espace::vue_courante() ? 'mdp-oublie.php' : 'connexion.php' );
+    echo '</div></div>';
+    get_footer();
+    return;
 }
 
 $npd_vue  = NPD_Espace::vue_courante();
@@ -36,7 +46,7 @@ get_header();
           require NPD_PATH . 'public/vues/acces-refuse.php';
       } elseif ( $npd_id && ! $npd_diag ) {
           require NPD_PATH . 'public/vues/introuvable.php';
-      } elseif ( 'liste' === $npd_vue ) {
+      } elseif ( 'liste' === $npd_vue || 'mdp_oublie' === $npd_vue ) {
           require NPD_PATH . 'public/vues/liste.php';
       } elseif ( 'mission' === $npd_vue ) {
           require NPD_PATH . 'public/vues/mission.php';

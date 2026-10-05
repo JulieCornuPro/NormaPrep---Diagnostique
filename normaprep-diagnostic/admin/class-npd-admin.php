@@ -124,6 +124,15 @@ class NPD_Admin {
             <?php endif; ?>
 
             <h2>Version active</h2>
+            <?php if ( $actif && 0 === strpos( $actif->version, 'demo' ) ) : ?>
+                <div class="notice notice-info inline">
+                    <p>
+                        Le référentiel actif est celui de <strong>démonstration</strong>, livré avec le plugin.
+                        Remplacez les fichiers du dossier <code>data/</code> par ceux du pipeline de contenu,
+                        puis relancez l'import.
+                    </p>
+                </div>
+            <?php endif; ?>
             <?php if ( $actif ) : ?>
                 <p>
                     <strong><?php echo esc_html( $actif->version ); ?></strong>
@@ -144,7 +153,13 @@ class NPD_Admin {
                     <?php endforeach; ?>
                 </ul>
             <?php else : ?>
-                <p><em>Aucun fichier.</em> Le format attendu est décrit dans <code>docs/format-donnees.md</code>.</p>
+                <p>
+                    <em>Aucun fichier.</em> Déposez dans ce dossier les fichiers du référentiel :
+                    <code>_referentiel.json</code>, <code>_profilage.json</code>,
+                    <code>_reglementations.json</code> (et, facultatif, <code>_prestations.json</code>),
+                    plus un sous-dossier par thème contenant un fichier par sous-thème.
+                    Le format est décrit dans <code>data/FORMAT.md</code>, livré avec le plugin.
+                </p>
             <?php endif; ?>
 
             <?php if ( $analyse['erreurs'] ) : ?>

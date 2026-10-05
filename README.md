@@ -7,7 +7,7 @@ Applicatif), mené par un consultant.
 
 - [Note de cadrage](docs/cadrage.md)
 - [Modèle conceptuel de données](docs/mcd.md)
-- [Format des fichiers du référentiel](docs/format-donnees.md)
+- [Format des fichiers du référentiel](normaprep-diagnostic/data/FORMAT.md)
 
 ## Contenu du dépôt
 
@@ -21,8 +21,9 @@ normaprep-diagnostic/      le plugin (à copier dans wp-content/plugins/)
   admin/                   écrans « Référentiel » et « Réglages »
   public/                  espace consultant (page publique) et ses écrans
   assets/                  styles et scripts de l'espace consultant
-  data/                    fichiers JSON du référentiel (pipeline de contenu)
-docs/                      cadrage, MCD, format des données
+  data/                    référentiel (démonstration livrée, puis pipeline de contenu)
+                           et son format (FORMAT.md)
+docs/                      cadrage, MCD
 tests/                     tests de bout en bout et référentiel d'exemple
 ```
 

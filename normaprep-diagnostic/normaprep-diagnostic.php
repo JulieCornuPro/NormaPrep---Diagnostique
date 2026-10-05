@@ -64,6 +64,15 @@ function npd_activation() {
     // Page « Espace consultant », qui porte tous les écrans des consultants.
     require_once NPD_PATH . 'public/class-npd-espace.php';
     NPD_Espace::creer_page();
+
+    // Première installation : on importe le référentiel livré dans data/
+    // (démonstration), pour que l'espace soit utilisable tout de suite. Un
+    // référentiel déjà importé n'est jamais remplacé à l'activation.
+    if ( ! NPD_Diagnostics::referentiel_actif_id() ) {
+        require_once NPD_PATH . 'database/class-npd-validateur.php';
+        require_once NPD_PATH . 'database/class-npd-importer.php';
+        NPD_Importer::importer();
+    }
 }
 register_activation_hook( __FILE__, 'npd_activation' );
 
@@ -111,7 +120,11 @@ function npd_init() {
     // Profilage réglementaire : calcul des réglementations et arbitrage.
     require_once NPD_PATH . 'includes/class-npd-profilage.php';
 
-    // Espace consultant (page publique) et cloisonnement de wp-admin.
+    // Limitation des tentatives de connexion (mire de l'espace consultant).
+    require_once NPD_PATH . 'includes/class-npd-limitation.php';
+
+    // Espace consultant (page publique avec sa mire de connexion) et
+    // cloisonnement de wp-admin.
     require_once NPD_PATH . 'public/class-npd-espace.php';
     NPD_Espace::init();
 

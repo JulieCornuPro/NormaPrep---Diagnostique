@@ -339,6 +339,79 @@ NPD_Espace::traiter_suppression( $d1 );
 npd_verifier( null === NPD_Diagnostics::obtenir( $d1 ) && ! NPD_Profilage::reponses( $d1 ) && ! npd_regs( $d1 ), 'suppression par son consultant : diagnostic, profilage et arbitrage effacés' );
 
 /* -------------------------------------------------------------------------
+ * 13. Mire de connexion
+ * ------------------------------------------------------------------------- */
+npd_titre( 'Mire de connexion' );
+
+require_once NPD_PATH . 'includes/class-npd-limitation.php';
+$raz_limites = function () {
+    global $wpdb;
+    $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_%npd\\_lim\\_%'" );
+    wp_cache_flush();
+};
+$raz_limites();
+
+// En ligne de commande, les cookies de connexion ne peuvent pas être envoyés.
+add_filter( 'send_auth_cookies', '__return_false' );
+wp_set_password( 'mdp-consultant-1', $c1 );
+$abonne = wp_insert_user( [ 'user_login' => 'npd_ab_' . wp_rand(), 'user_pass' => 'mdp-abonne-1', 'user_email' => 'ab-' . wp_rand() . '@example.com', 'role' => 'subscriber' ] );
+$email_c1 = get_userdata( $c1 )->user_email;
+
+wp_set_current_user( 0 );
+$essai = function ( $email, $mdp ) {
+    npd_raz_erreurs();
+    $ok = NPD_Espace::traiter_connexion( [ 'email' => $email, 'mdp' => $mdp ] );
+    wp_set_current_user( 0 );
+    return [ $ok, NPD_Espace::erreurs() ];
+};
+
+list( $ok, $e_mdp ) = $essai( $email_c1, 'mauvais' );
+list( , $e_inconnu ) = $essai( 'personne@example.com', 'x' );
+list( , $e_abonne ) = $essai( get_userdata( $abonne )->user_email, 'mdp-abonne-1' );
+npd_verifier( ! $ok && [ NPD_Espace::MESSAGE_ECHEC_CONNEXION ] === $e_mdp, 'mot de passe faux : refusé' );
+npd_verifier( $e_mdp === $e_inconnu && $e_mdp === $e_abonne, 'compte inconnu, compte non consultant, mot de passe faux : même message' );
+npd_verifier( ! $essai( get_userdata( $abonne )->user_email, 'mdp-abonne-1' )[0], 'un compte non consultant ne peut pas se connecter par la mire (même avec le bon mot de passe)' );
+
+$raz_limites();
+list( $ok ) = $essai( $email_c1, 'mdp-consultant-1' );
+npd_verifier( $ok, 'consultant avec le bon mot de passe : connecté' );
+
+$raz_limites();
+for ( $i = 0; $i < NPD_Limitation::MAX_PAR_COMPTE; $i++ ) {
+    $essai( $email_c1, 'mauvais' );
+}
+list( $ok, $e ) = $essai( $email_c1, 'mdp-consultant-1' );
+npd_verifier( ! $ok && false !== strpos( $e[0], 'Trop de tentatives' ), 'après ' . NPD_Limitation::MAX_PAR_COMPTE . ' échecs : bloqué, même avec le bon mot de passe' );
+$raz_limites();
+
+// Mot de passe oublié : courriel aux seuls consultants, réponse identique.
+$courriels = [];
+$capture   = function ( $retour, $atts ) use ( &$courriels ) {
+    $courriels[] = $atts['to'];
+    return true; // n'envoie rien
+};
+add_filter( 'pre_wp_mail', $capture, 10, 2 );
+$flash = function () {
+    global $wpdb;
+    $v = $wpdb->get_var( "SELECT option_value FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_npd\\_flash\\_v%' ORDER BY option_id DESC LIMIT 1" );
+    $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_%npd\\_flash\\_v%'" );
+    wp_cache_flush();
+    return $v ? maybe_unserialize( $v )['texte'] : '';
+};
+NPD_Espace::traiter_mdp_oublie( [ 'email' => $email_c1 ] );
+$m1 = $flash();
+NPD_Espace::traiter_mdp_oublie( [ 'email' => get_userdata( $abonne )->user_email ] );
+$m2 = $flash();
+NPD_Espace::traiter_mdp_oublie( [ 'email' => 'personne@example.com' ] );
+$m3 = $flash();
+remove_filter( 'pre_wp_mail', $capture, 10 );
+npd_verifier( [ $email_c1 ] === $courriels, 'un seul courriel, au consultant' );
+npd_verifier( '' !== $m1 && $m1 === $m2 && $m1 === $m3, 'même réponse pour consultant, non-consultant et adresse inconnue' );
+npd_verifier( ! get_transient( 'npd_flash_u' . $admin_id ), 'message d\'un visiteur non connecté : pas affiché à un compte connecté' );
+$raz_limites();
+wp_delete_user( $abonne );
+
+/* -------------------------------------------------------------------------
  * Nettoyage
  * ------------------------------------------------------------------------- */
 wp_set_current_user( $admin_id );

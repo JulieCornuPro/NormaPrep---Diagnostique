@@ -221,7 +221,7 @@ class NPD_Profilage {
      * ===================================================================== */
 
     /**
-     * Évalue une condition (grammaire : docs/format-donnees.md).
+     * Évalue une condition (grammaire : data/FORMAT.md).
      *
      * Une forme inconnue est FAUSSE : en cas de doute, on ne fait pas
      * ressortir une réglementation.

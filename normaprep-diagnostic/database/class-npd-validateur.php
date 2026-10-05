@@ -8,7 +8,7 @@
  * validateur lit donc TOUS les fichiers, vérifie TOUTES les références, et
  * l'import n'écrit rien si la moindre erreur subsiste.
  *
- * Le format des fichiers est décrit dans docs/format-donnees.md.
+ * Le format des fichiers est décrit dans data/FORMAT.md.
  *
  * Le résultat est un « modèle » normalisé (tableaux PHP aux clés fixes) que
  * NPD_Importer écrit en base sans avoir à revérifier quoi que ce soit.

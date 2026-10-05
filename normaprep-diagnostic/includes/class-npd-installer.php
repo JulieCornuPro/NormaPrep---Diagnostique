@@ -2,7 +2,7 @@
 /**
  * Installation du plugin NormaPrep Diagnostic.
  *
- * Crée les tables à partir du modèle conceptuel validé (docs/mcd.md). Deux
+ * Crée les tables à partir du modèle conceptuel validé (docs/mcd.md du dépôt). Deux
  * blocs :
  *
  *   - le RÉFÉRENTIEL, alimenté par l'import des fichiers JSON de data/ ;
